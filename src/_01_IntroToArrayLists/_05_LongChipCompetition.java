@@ -13,9 +13,24 @@ public class _05_LongChipCompetition {
 	 * initialize The Beatles before you start your search. *
 	 **/
 	private ArrayList<Beatle> theBeatles = new ArrayList<Beatle>();
+	Double longest = 0.0;
 
 	public static void main(String[] args) {
+		String n = "";
+		
 		_05_LongChipCompetition lcc = new _05_LongChipCompetition();
+		lcc.initializeBeatles();
+		for (int i = 0; i < lcc.theBeatles.size(); i++) {
+			ArrayList <Chip> c = lcc.theBeatles.get(i).getChips();
+			for (int j = 0; j < c.size(); j++) {
+				if(c.get(j).getLength() > lcc.longest) {
+					lcc.longest = c.get(j).getLength();
+					Beatle b = lcc.theBeatles.get(i);
+					n = b.getName();
+				}
+			}
+		}
+		System.out.println(n);
 		
 	}
 	
@@ -28,6 +43,7 @@ public class _05_LongChipCompetition {
 		theBeatles.add(john);
 		theBeatles.add(paul);
 		theBeatles.add(ringo);
+		
 	}
 	
 	public ArrayList<Beatle> getTheBand(){
