@@ -1,101 +1,119 @@
 package _04_HangMan;
 
-import java.awt.Font;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Stack;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 public class HangMan implements KeyListener {
-	public static void main(String[] args) {
-		HangMan hang = new HangMan();
-		
-		String Num = JOptionPane.showInputDialog("Choose A Number From 1 To 266");
-		int num = Integer.parseInt(Num);
-		Stack<String> stack = new Stack<String>();
-	
-		for (int i = 0; i < num; i++) {
-			String words = Utilities.readRandomLineFromFile(filename);
-			if (stack.contains(words)) {
-				i--;
-			} else {
-				stack.push(words);
-			}
-	
-		}
-		System.out.println(stack);
-		last = stack.pop();
-		cha = last.length();
-		System.out.println(last);
-		System.out.println(cha);
-		hang.stuff();
-	
-	}
-	static String filename = "src/_04_HangMan/dictionary.txt";
 	JFrame frame = new JFrame();
-	JLabel label = new JLabel();
-	public int lifes = 10;
-	JLabel lives = new JLabel();
 	JPanel panel = new JPanel();
-	static String last = "";
-	static int cha;
-	public void stuff() {
-		frame.add(panel);
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(500, 500);
-		frame.addKeyListener(this);
-		panel.add(label);
-		panel.add(lives);
-		label.setVisible(true);
-		String blanks = "";
-		for (int i = 0; i < cha; i++) {
-			blanks += " __ ";
+	JLabel label = new JLabel();
+	JLabel label2 = new JLabel();
+	JLabel lives = new JLabel();
+	int livesCount = 10;
+	String displayString, actualWord, letterList;
+	ArrayList<Character> guessedLetters = new ArrayList<Character>();
+
+	void reloadDisplay() {
+		displayString = "";
+		for (int i = 0; i < actualWord.length(); i++) {
+			displayString += "_";
 		}
-		label.setFont(new Font("Serif", Font.PLAIN,20));
-		label.setText(blanks);
+		char[] r = displayString.toCharArray();
+		for (int i = 0; i < guessedLetters.size(); i++) {
+			for (int j = 0; j < actualWord.length(); j++) {
+				if (actualWord.charAt(j) == guessedLetters.get(i)) {
+					r[j] = guessedLetters.get(i);
+				}
+			}
+		}
 		
-		lives.setText("       You Have " + lifes + " Lives");
-		
+		displayString = "";
+		for (int i = 0; i < r.length; i++) {
+			displayString += r[i];
+		}
+		letterList = "";
+		for (Character i : guessedLetters) {
+			boolean has = false;
+			for (int j = 0; j < r.length; j++) {
+				if (r[j] == i)
+					has = true;
+			}
+			if (!has) {
+				letterList += i;
+			}
+		}
+
+		label.setText(displayString);
+		label2.setText(letterList);
+		livesCount = 10 - letterList.length();
+		lives.setText(livesCount+"");
+		frame.pack();
+		if(livesCount < 1) {
+			JOptionPane.showMessageDialog(null, "You lost. The word was "+actualWord+".");
+			System.exit(0);
+		}
 	}
+
+	void newWord() {
+		frame.setVisible(false);
+		actualWord = Utilities.readRandomLineFromFile("src/_04_HangMan/dictionary.txt");
+		reloadDisplay();
+		frame.setVisible(true);
+	}
+
+	public HangMan() {
+		frame.add(panel);
+		panel.add(label);
+		panel.add(label2);
+		panel.add(lives);
+		frame.addKeyListener(this);
+		label.setText(displayString);
+	}
+
+	void start() {
+		frame.pack();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		label2.setForeground(Color.RED);
+		lives.setForeground(Color.BLUE);
+		frame.setVisible(true);
+		newWord();
+	}
+
+	public static void main(String[] args) {
+		new HangMan().start();
+	}
+
 	@Override
 	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		char c = e.getKeyChar();
-		boolean right = false;
-		
-		for (int i = 0; i < cha; i++) {
-		
-			if (last.charAt(i)==c) {
-				label.setText(Character.toString(c));
-				right = true;
-			} 
-			
+		if (!guessedLetters.contains(e.getKeyChar())) {
+			guessedLetters.add(e.getKeyChar());
+			System.out.println("typed");
 		}
+
+		reloadDisplay();
 		
-		if(!right) {
-			lifes = lifes - 1;
-			lives.setText("       You Have " + lifes + " Lives");
+		if(!displayString.contains("_")) {
+			JOptionPane.showMessageDialog(null, "You won!");
+			System.exit(0);
 		}
 	}
+
 	@Override
 	public void keyPressed(KeyEvent e) {
 		// TODO Auto-generated method stub
-		
-		
+
 	}
+
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
